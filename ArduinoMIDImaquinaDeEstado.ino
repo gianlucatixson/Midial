@@ -98,14 +98,14 @@ void playNotes()
       if (bitRead(pressedButtons, i))
       {
         bitWrite(previousButtons, i , 1);
-        noteOn(0, notePitches_D[i], intensity);
+        noteOn(0, notePitches[i], intensity);
         MidiUSB.flush();
       }
       
       else
       {
         bitWrite(previousButtons, i , 0);
-        noteOff(0, notePitches_D[i], 0);
+        noteOff(0, notePitches[i], 0);
         MidiUSB.flush();
       }
     }
@@ -140,30 +140,28 @@ void programa(){
 
 }
 
-
-
-
-void setup() {
-  for (int i = 0; i < NUM_BUTTONS; i++)
-    pinMode(buttons[i], INPUT_PULLUP);
-}
-
 void noteOn(byte channel, byte pitch, byte velocity) {
   midiEventPacket_t noteOn = {0x09, 0x90 | channel, pitch, velocity};
   MidiUSB.sendMIDI(noteOn);
-    
 }
 
 void noteOff(byte channel, byte pitch, byte velocity) {
   midiEventPacket_t noteOff = {0x08, 0x80 | channel, pitch, velocity};
   MidiUSB.sendMIDI(noteOff);
-    
+}
+
+void setup() {
+
+  for (int i = 0; i < NUM_BUTTONS; i++)
+    pinMode(buttons[i], INPUT_PULLUP);
+
 }
 
 void loop() {
+
   readButtons();
   playNotes();
   contador();
   programa();
-    
+
 }
