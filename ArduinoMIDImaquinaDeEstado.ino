@@ -4,11 +4,11 @@
 #define NUM_BUTTONS  7
 
 //pulsadores pitch++ y pitch--
-#define BTN_PITCH_MAS 5;
-#define BTN_PITCH_MENOS 7;
+#define BTN_PITCH_MAS 5
+#define BTN_PITCH_MENOS 7
 
 //contador
-//int escala = 0;
+int escala = 0;
 
 //pines LDRs
 const uint8_t LDR1 = 16;
@@ -31,6 +31,7 @@ const byte notePitches_F[NUM_BUTTONS] = {pitchF3, pitchG3, pitchA3, pitchB3b, pi
 const byte notePitches_G[NUM_BUTTONS] = {pitchG3, pitchA3, pitchB3, pitchC3, pitchD4, pitchE3, pitchG3b};
 const byte notePitches_A[NUM_BUTTONS] = {pitchA3, pitchB3, pitchD4b, pitchD4, pitchE4, pitchG4b, pitchA4b};
 const byte notePitches_B[NUM_BUTTONS] = {pitchB3, pitchD4b, pitchE4b, pitchE4, pitchG4b, pitchA4b, pitchB4b};
+byte notePitches[NUM_BUTTONS];
 
 uint8_t notesTime[NUM_BUTTONS];
 uint8_t pressedButtons = 0x00;
@@ -44,7 +45,7 @@ enum scales{
     ESCALA_F_MAYOR,
     ESCALA_G_MAYOR,
     ESCALA_A_MAYOR,
-    ESCALA_B_MAYOR;
+    ESCALA_B_MAYOR
     };
 
 void controlChange(byte channel, byte control, byte value) {
@@ -97,22 +98,22 @@ void playNotes()
       if (bitRead(pressedButtons, i))
       {
         bitWrite(previousButtons, i , 1);
-        noteOn(0, notePitches[i], intensity);
+        noteOn(0, notePitches_D[i], intensity);
         MidiUSB.flush();
       }
+      
       else
       {
         bitWrite(previousButtons, i , 0);
-        noteOff(0, notePitches[i], 0);
+        noteOff(0, notePitches_D[i], 0);
         MidiUSB.flush();
       }
     }
   }
 }
 
-void programa()
+void programa(){
   
-  contador();
     switch (escala) {
     case ESCALA_C_MAYOR:
       (notePitches_C);
@@ -137,18 +138,32 @@ void programa()
      break;
   }
 
+}
 
+
+
+
+void setup() {
+  for (int i = 0; i < NUM_BUTTONS; i++)
+    pinMode(buttons[i], INPUT_PULLUP);
+}
 
 void noteOn(byte channel, byte pitch, byte velocity) {
-
   midiEventPacket_t noteOn = {0x09, 0x90 | channel, pitch, velocity};
-
   MidiUSB.sendMIDI(noteOn);
+    
 }
 
 void noteOff(byte channel, byte pitch, byte velocity) {
-
   midiEventPacket_t noteOff = {0x08, 0x80 | channel, pitch, velocity};
-
   MidiUSB.sendMIDI(noteOff);
+    
+}
+
+void loop() {
+  readButtons();
+  playNotes();
+  contador();
+  programa();
+    
 }
