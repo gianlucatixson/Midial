@@ -32,7 +32,7 @@ const byte notePitches_F[NUM_BUTTONS] = {pitchF3, pitchG3, pitchA3, pitchB3b, pi
 const byte notePitches_G[NUM_BUTTONS] = {pitchG3, pitchA3, pitchB3, pitchC3, pitchD4, pitchE4, pitchG4b};
 const byte notePitches_A[NUM_BUTTONS] = {pitchA3, pitchB3, pitchD4b, pitchD4, pitchE4, pitchG4b, pitchA4b};
 const byte notePitches_B[NUM_BUTTONS] = {pitchB3, pitchD4b, pitchE4b, pitchE4, pitchG4b, pitchA4b, pitchB4b};
-byte notePitches[NUM_BUTTONS] = {pitchC3, pitchD4b, pitchE4b, pitchE4, pitchG4b, pitchA4b, pitchB4b};
+//byte notePitches[NUM_BUTTONS] = {pitchC3, pitchD4b, pitchE4b, pitchE4, pitchG4b, pitchA4b, pitchB4b};
 
 uint8_t notesTime[NUM_BUTTONS];
 uint8_t pressedButtons = 0x00;
@@ -79,25 +79,25 @@ void programa(){
   
     switch (escala) {
     case ESCALA_C_MAYOR:
-      (notePitches_C);
+     playNotes (notePitches_C);
      break;
     case ESCALA_D_MAYOR:
-      (notePitches_D);
+     playNotes (notePitches_D);
      break;
     case ESCALA_E_MAYOR:
-      (notePitches_E);
+     playNotes (notePitches_E);
      break;
     case ESCALA_F_MAYOR:
-      (notePitches_F);
+     playNotes (notePitches_F);
      break;
     case ESCALA_G_MAYOR:
-      (notePitches_G);
+     playNotes (notePitches_G);
      break;
     case ESCALA_A_MAYOR:
-      (notePitches_A);
+     playNotes (notePitches_A);
       break;
     case ESCALA_B_MAYOR:
-      (notePitches_B);
+     playNotes (notePitches_B);
      break;
   }
 
@@ -124,7 +124,7 @@ void readIntensity()
   intensity = (uint8_t) (map(val, 0, 1023, 0, 127));
 }
 
-void playNotes()
+void playNotes (const byte notePitches[])
 {
   for (int i = 0; i < NUM_BUTTONS; i++)
   {
@@ -160,18 +160,18 @@ void noteOff(byte channel, byte pitch, byte velocity) {
 }
 
 void setup() {
-
+  Serial.begin(9600);
   for (int i = 0; i < NUM_BUTTONS; i++)
     pinMode(buttons[i], INPUT_PULLUP);
 
 }
 
 void loop() {
- 
+ Serial.println(escala);
   contador();
   programa();
   readButtons();
   readIntensity();
-  playNotes();
+  //playNotes();
   
 }
