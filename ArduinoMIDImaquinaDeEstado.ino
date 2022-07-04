@@ -18,6 +18,7 @@ const uint8_t LDR4 = 11;
 const uint8_t LDR5 = 10;
 const uint8_t LDR6 = 9;
 const uint8_t LDR7 = 8;
+const int intensityPot = 0;
 
 //configuracion midi
 const uint8_t buttons[NUM_BUTTONS] = {LDR1, LDR2, LDR3, LDR4, LDR5, LDR6, LDR7};
@@ -28,10 +29,10 @@ const byte notePitches_C[NUM_BUTTONS] = {pitchC3, pitchD3, pitchE3, pitchF3, pit
 const byte notePitches_D[NUM_BUTTONS] = {pitchD3, pitchE3, pitchG3b, pitchG3, pitchA3, pitchB3, pitchD4b};
 const byte notePitches_E[NUM_BUTTONS] = {pitchE3, pitchG3b, pitchA3b, pitchA3, pitchB3, pitchD4b, pitchE4b};
 const byte notePitches_F[NUM_BUTTONS] = {pitchF3, pitchG3, pitchA3, pitchB3b, pitchC4, pitchD4, pitchE4};
-const byte notePitches_G[NUM_BUTTONS] = {pitchG3, pitchA3, pitchB3, pitchC3, pitchD4, pitchE3, pitchG3b};
+const byte notePitches_G[NUM_BUTTONS] = {pitchG3, pitchA3, pitchB3, pitchC3, pitchD4, pitchE4, pitchG4b};
 const byte notePitches_A[NUM_BUTTONS] = {pitchA3, pitchB3, pitchD4b, pitchD4, pitchE4, pitchG4b, pitchA4b};
 const byte notePitches_B[NUM_BUTTONS] = {pitchB3, pitchD4b, pitchE4b, pitchE4, pitchG4b, pitchA4b, pitchB4b};
-byte notePitches[NUM_BUTTONS];
+byte notePitches[NUM_BUTTONS] = {pitchC3, pitchD4b, pitchE4b, pitchE4, pitchG4b, pitchA4b, pitchB4b};
 
 uint8_t notesTime[NUM_BUTTONS];
 uint8_t pressedButtons = 0x00;
@@ -60,7 +61,7 @@ void contador()
   int estPulsador_1 = digitalRead(BTN_PITCH_MAS);
   if (estPulsador_1 == 1){
     escala = escala + 1;
-    //Serial.println(escala);
+    Serial.println(escala);
     if (escala>7)
      escala = 0;
   }
@@ -68,49 +69,11 @@ void contador()
   int estPulsador_0 = digitalRead(BTN_PITCH_MENOS);
   if (estPulsador_0 == 1){
     escala = escala - 1;
-    //Serial.println(escala);
+    Serial.println(escala);
     if(escala<0)
     escala = 7;
   }
   }
-
-
-void readButtons()
-{
-  for (int i = 0; i < NUM_BUTTONS; i++)
-  {
-    if (digitalRead(buttons[i]) == LOW)
-    {
-      bitWrite(pressedButtons, i, 1);
-      delay(50);
-    }
-    else
-      bitWrite(pressedButtons, i, 0);
-  }
-}
-
-void playNotes()
-{
-  for (int i = 0; i < NUM_BUTTONS; i++)
-  {
-    if (bitRead(pressedButtons, i) != bitRead(previousButtons, i))
-    {
-      if (bitRead(pressedButtons, i))
-      {
-        bitWrite(previousButtons, i , 1);
-        noteOn(0, notePitches[i], intensity);
-        MidiUSB.flush();
-      }
-      
-      else
-      {
-        bitWrite(previousButtons, i , 0);
-        noteOff(0, notePitches[i], 0);
-        MidiUSB.flush();
-      }
-    }
-  }
-}
 
 void programa(){
   
@@ -140,6 +103,52 @@ void programa(){
 
 }
 
+
+void readButtons()
+{
+  for (int i = 0; i < NUM_BUTTONS; i++)
+  {
+    if (digitalRead(buttons[i]) == LOW)
+    {
+      bitWrite(pressedButtons, i, 1);
+      delay(50);
+    }
+    else
+      bitWrite(pressedButtons, i, 0);
+  }
+}
+
+void readIntensity()
+{
+  int val = analogRead(intensityPot);
+  intensity = (uint8_t) (map(val, 0, 1023, 0, 127));
+}
+
+void playNotes()
+{
+  for (int i = 0; i < NUM_BUTTONS; i++)
+  {
+    if (bitRead(pressedButtons, i) != bitRead(previousButtons, i))
+    {
+      if (bitRead(pressedButtons, i))
+      {
+        bitWrite(previousButtons, i , 1);
+        noteOn(0, notePitches[i], intensity);
+        MidiUSB.flush();
+      }
+      
+      else
+      {
+        bitWrite(previousButtons, i , 0);
+        noteOff(0, notePitches[i], 0);
+        MidiUSB.flush();
+      }
+    }
+  }
+}
+
+
+
 void noteOn(byte channel, byte pitch, byte velocity) {
   midiEventPacket_t noteOn = {0x09, 0x90 | channel, pitch, velocity};
   MidiUSB.sendMIDI(noteOn);
@@ -158,10 +167,11 @@ void setup() {
 }
 
 void loop() {
-
-  readButtons();
-  playNotes();
+ 
   contador();
   programa();
-
+  readButtons();
+  readIntensity();
+  playNotes();
+  
 }
